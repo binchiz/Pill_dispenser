@@ -16,11 +16,6 @@ foreach (TEST_SOURCE ${TEST_SOURCES})
     # link to the library
     target_link_libraries(${TEST_NAME}
             ${PROJECT_NAME}_lib
-            pico_stdlib
-            hardware_pwm
-            hardware_gpio
-            hardware_i2c
-            hardware_uart
     )
 
     # output to UART

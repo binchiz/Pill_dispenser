@@ -26,8 +26,7 @@ add_compile_options(-Wall
 add_subdirectory(test)
 
 # Include directories
-include_directories(${PROJECT_SOURCE_DIR}/hardware)
-include_directories(${PROJECT_SOURCE_DIR}/utils)
+include_directories(${PROJECT_SOURCE_DIR}/src)
 
 # Create a library from your source files (excluding main.c)
 add_library(${PROJECT_NAME}_lib STATIC
