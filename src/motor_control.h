@@ -1,5 +1,5 @@
-#ifndef DISPENSER_CONTROL_H
-#define DISPENSER_CONTROL_H
+#ifndef MOTOR_CONTROL_H
+#define MOTOR_CONTROL_H
 
 #include <stdbool.h>
 #include <stddef.h>
@@ -22,4 +22,4 @@ void align_dispenser();
  */
 bool dispense_pill();
 
-#endif // DISPENSER_CONTROL_H
+#endif // MOTOR_CONTROL_H

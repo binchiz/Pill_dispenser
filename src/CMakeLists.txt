@@ -18,7 +18,7 @@ add_library(${PROJECT_NAME}_lib STATIC
         utils/debug.c
 
         # main logic
-        dispenser_control.c
+        motor_control.c
         lora_msg.c
         storage.c
 )

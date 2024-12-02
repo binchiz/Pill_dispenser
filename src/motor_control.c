@@ -1,4 +1,4 @@
-#include "dispenser_control.h"
+#include "motor_control.h"
 #include "drivers/stepper_motor.h"
 
 // create an "instance" of the stepper motor here
