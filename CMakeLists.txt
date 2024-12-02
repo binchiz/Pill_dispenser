@@ -24,4 +24,55 @@ add_compile_options(-Wall
 
 # Add the src and test directory
 add_subdirectory(test)
-add_subdirectory(src)
+
+# Include directories
+include_directories(${PROJECT_SOURCE_DIR}/hardware)
+include_directories(${PROJECT_SOURCE_DIR}/utils)
+
+# Create a library from your source files (excluding main.c)
+add_library(${PROJECT_NAME}_lib STATIC
+        # drivers
+        src/drivers/button.c
+        src/drivers/eeprom.c
+        src/drivers/led.c
+        src/drivers/lora.c
+        src/drivers/piezo_sensor.c
+        src/drivers/stepper_motor.c
+        src/drivers/isr.c
+
+        # utils
+        src/utils/debug.c
+
+        # main logic
+        src/motor_control.c
+        src/lora_msg.c
+        src/storage.c
+)
+
+
+# Add the main executable
+add_executable(${PROJECT_NAME}
+        # main
+        src/main.c
+)
+
+# Link the necessary Pico SDK libraries to the static library
+target_link_libraries(${PROJECT_NAME}_lib
+        pico_stdlib
+        hardware_pwm
+        hardware_gpio
+        hardware_i2c
+        hardware_uart
+)
+
+# Link the static library to the main executable
+target_link_libraries(${PROJECT_NAME}
+        ${PROJECT_NAME}_lib
+)
+
+# Create map/bin/hex/uf2 files
+pico_add_extra_outputs(${PROJECT_NAME})
+
+# Disable USB output, enable UART output
+pico_enable_stdio_usb(${PROJECT_NAME} 0)
+pico_enable_stdio_uart(${PROJECT_NAME} 1)
