@@ -16,7 +16,7 @@ typedef struct {
   direction_t default_direction;
   int step;
   int step_per_rev;
-  int pills_left;
+  int turns_left;
 } dispenser_t;
 
 void setup_dispenser(const dispenser_t *dispenser);
