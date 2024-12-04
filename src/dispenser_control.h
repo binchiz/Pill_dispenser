@@ -4,7 +4,7 @@
 #include <stdbool.h>
 
 void init_dispenser();
-void align_dispenser();
+void align_dispenser(int rev);
 bool dispense_pill(int n);
 
 

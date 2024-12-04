@@ -1,18 +1,18 @@
 #include "dispenser_control.h"
-
 #include <stdio.h>
 #include "pico/stdlib.h"
-#include "dispenser.h"
+#include "drivers/dispenser.h"
 
 static dispenser_t stepper_dispenser = {
-    .pins = {2, 3, 6, 13},
+    .calibrated = false,
     .opto_fork = 28,
     .piezo = 27,
+    .pins = {2, 3, 6, 13},
     .step_bits = {0b0001, 0b0011, 0b0010, 0b0110, 0b0100, 0b1100, 0b1000, 0b1001},
     .default_direction = COUNTER_CLOCKWISE,
-    .step_per_rev = 4096,
     .step = 0,
-    .calibrated = false,
+    .step_per_rev = 4096,
+    .pills_left = 8
 };
 
 static int slices = 8;
