@@ -34,8 +34,9 @@ add_library(${PROJECT_NAME}_lib STATIC
         src/drivers/button.c
         src/drivers/eeprom.c
         src/drivers/led.c
-        src/drivers/lora.c
-        src/drivers/piezo_sensor.c
+        src/drivers/uart_irq/uart.c
+        src/drivers/uart_irq/ring_buffer.c
+        #src/drivers/piezo_sensor.c
         #src/drivers/stepper_motor.c
         src/drivers/isr.c
         src/drivers/dispenser.c
@@ -45,7 +46,7 @@ add_library(${PROJECT_NAME}_lib STATIC
 
         # main logic
         #src/motor_control.c
-        src/lora_msg.c
+        src/lora.c
         src/storage.c
         src/dispenser_control.c
 )
