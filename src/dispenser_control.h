@@ -5,7 +5,8 @@
 
 void init_dispenser();
 void align_dispenser(int rev);
-bool dispense_pill(int n);
-
+bool dispense_pill();
+void run_n_slice(int n);
+void error_calibration(int n);
 
 #endif

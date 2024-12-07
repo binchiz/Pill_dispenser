@@ -13,10 +13,10 @@ typedef struct {
   uint piezo;
   uint pins[dispenser_TOTAL_PINS];
   uint step_bits[dispenser_TOTAL_STEPS];
-  direction_t default_direction;
+  direction_t direction;
   int step;
   int step_per_rev;
-  int turns_left;
+  int slices_runned;
 } dispenser_t;
 
 void setup_dispenser(const dispenser_t *dispenser);

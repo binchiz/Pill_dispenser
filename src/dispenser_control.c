@@ -9,10 +9,10 @@ static dispenser_t dispenser = {
     .piezo = 27,
     .pins = {2, 3, 6, 13},
     .step_bits = {0b0001, 0b0011, 0b0010, 0b0110, 0b0100, 0b1100, 0b1000, 0b1001},
-    .default_direction = COUNTER_CLOCKWISE,
+    .direction = COUNTER_CLOCKWISE,
     .step = 0,
     .step_per_rev = 4096,
-    .turns_left = 8
+    .slices_runned = 0
 };
 
 static int slices = 8;
@@ -43,13 +43,27 @@ void align_dispenser(int rev) {
         steps_count ++;
         if (previous_read==1&&current_read==0) count++;
     }
-    dispenser.step_per_rev = steps_count/rev;
+    if (rev>0) dispenser.step_per_rev = steps_count/rev;
     dispenser.calibrated = true;
 }
 
-bool dispense_pill(int n) {
-    bool pill = false;
+void error_calibration(int n) {
+    dispenser.direction = !(dispenser.direction);
+    align_dispenser(0);
+    dispenser.direction = !(dispenser.direction);
+    run_n_slice(n);
+}
+
+void run_n_slice(int n) {
     int steps_to_run = (dispenser.step_per_rev / slices) * n;
+    for (int i = 0; i < steps_to_run; i++) {
+        run_dispenser(&dispenser);
+    }
+}
+
+bool dispense_pill() {
+    bool pill = false;
+    int steps_to_run = dispenser.step_per_rev / slices;
     uint start_time = to_ms_since_boot(get_absolute_time());
     for (int i = 0; i < steps_to_run; i++) {
         run_dispenser(&dispenser);
@@ -61,5 +75,6 @@ bool dispense_pill(int n) {
             }
         }
     }
+    (dispenser.slices_runned)++;
     return pill;
 }

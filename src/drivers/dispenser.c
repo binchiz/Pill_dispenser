@@ -17,7 +17,7 @@ void setup_dispenser(const dispenser_t *dispenser) {
 }
 
 void run_dispenser(dispenser_t *dispenser) {
-    if (dispenser->default_direction == COUNTER_CLOCKWISE) {
+    if (dispenser->direction == COUNTER_CLOCKWISE) {
         dispenser->step = (dispenser->step + 1) % 8;
     } else {
         dispenser->step = (dispenser->step - 1 + 8) % 8;
