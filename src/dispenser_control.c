@@ -27,8 +27,8 @@ void init_dispenser() {
     init_storage();
 }
 
-void restore_dispenser() {
-    load_dispenser_slice_ran(&dispenser.slices_ran);
+void restore_dispenser_slices_ran(int slices_ran) {
+    dispenser.slices_ran = slices_ran;
 }
 
 void align_dispenser(int rev) {
