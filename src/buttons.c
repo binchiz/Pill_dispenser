@@ -72,6 +72,11 @@ void disable_buttons() {
     gpio_set_irq_enabled(SW0_PIN, GPIO_IRQ_EDGE_RISE, false);
     gpio_set_irq_enabled(SW1_PIN, GPIO_IRQ_EDGE_RISE, false);
     gpio_set_irq_enabled(SW2_PIN, GPIO_IRQ_EDGE_RISE, false);
+    // ensure the queue is empty
+    event_t event;
+    while (queue_try_remove(&button_event_queue, &event)) {
+        // do nothing
+    }
 }
 
 event_t get_button_event() {
