@@ -7,7 +7,6 @@ static int current_debug_level = DEBUG_LEVEL_NONE;
 void set_debug_level(int debug_level) { current_debug_level = debug_level; }
 
 int dprintf(int debug_level, const char *fmt, ...) {
-#ifdef ENABLE_DPRINT
     if (debug_level > current_debug_level) {
         return 0;
     }
@@ -35,7 +34,4 @@ int dprintf(int debug_level, const char *fmt, ...) {
     int ret = vfprintf(stderr, fmt, args);
     va_end(args);
     return ret;
-#else
-    return 0;
-#endif
 }

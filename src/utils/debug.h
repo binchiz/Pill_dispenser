@@ -1,8 +1,6 @@
 #ifndef DEBUG_H
 #define DEBUG_H
 
-#define ENABLE_DPRINT 1
-
 typedef enum {
     DEBUG_LEVEL_NONE = 0,
     DEBUG_LEVEL_ERROR = 1,
