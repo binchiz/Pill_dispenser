@@ -1,5 +1,6 @@
 #include "lora.h"
 #include "drivers/uart_irq/uart.h"
+#include "utils/debug.h"
 #include <pico/stdio.h>
 #include <pico/time.h>
 #include <stdio.h>
@@ -50,9 +51,9 @@ void connect_lora(const lora_t *lora) {
             return;
         }
     }
-    printf("network connect successfully\n");
+    dprintf(DEBUG_LEVEL_INFO, "network connect successfully\n");
 #else
-    printf("connect_lora (lora is disabled)\n");
+    dprintf(DEBUG_LEVEL_DEBUG, "connect_lora (lora is disabled)\n");
 #endif
 }
 
@@ -73,11 +74,11 @@ int send_message(const int event_code, char *message) {
         printf("send failed\n");
         return 0;
     }
-    printf("%s send successfully\n", message);
+    dprintf(DEBUG_LEVEL_INFO, "%s send successfully\n", message);
     return 1;
 #else
-    printf("send_message (lora is disabled)\n");
-    return 0;
+    dprintf(DEBUG_LEVEL_DEBUG, "send_message (lora is disabled)\n");
+    return 1;
 #endif
 }
 
@@ -87,6 +88,6 @@ void lora_init_and_connect() {
     uart_setup(lora.uart_nr, lora.tx_pin, lora.rx_pin, lora.baud_rate);
     connect_lora(&lora);
 #else
-    printf("lora_init_and_connect (lora is disabled)\n");
+    dprintf(DEBUG_LEVEL_DEBUG, "lora_init_and_connect (lora is disabled)\n");
 #endif
 }
