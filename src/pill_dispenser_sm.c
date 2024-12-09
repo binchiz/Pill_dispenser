@@ -7,21 +7,24 @@
 #include "utils/debug.h"
 
 static dispenser_state_t data;
+static int slices_ran;
 
 
 void run_dispenser_sm (dispenser_sm *dispenser_sm_ptr) {
     switch (dispenser_sm_ptr->state) {
         case stStart:
-            restore_dispenser();
+            load_dispenser_slice_ran(&slices_ran);
+            restore_dispenser_slices_ran(slices_ran);
             load_dispenser_state(&data);
             if (data == DISPENSER_TURNING) {
                 send_message(POWER_OFF_DURING_TURNING, "Powered Off During Turn");
                 dispenser_sm_ptr->state = stError;
             }
-            else {
+            else if (slices_ran == 0) {
                 dispenser_sm_ptr -> state = stCalibWait;
                 enable_buttons();
             }
+            else dispenser_sm_ptr->state = stDispense;
             break;
         case stError:
             error_calibration();
