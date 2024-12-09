@@ -7,10 +7,10 @@ int main(void) {
     printf("Hello from test_example!\n");
 
     led_t led = {.pin = 22, .state = false};
-    led_init(&led);
+    init_led(&led);
 
     while (true) {
-        set_led(&led, !led.state);
+        toggle_led(&led);
         sleep_ms(500);
     }
     return 0;

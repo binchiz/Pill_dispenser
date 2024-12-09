@@ -1,7 +1,8 @@
 #include "dispenser_control.h"
-#include <stdio.h>
-#include "pico/stdlib.h"
 #include "drivers/dispenser.h"
+#include "pico/stdlib.h"
+#include "storage.h"
+#include <stdio.h>
 
 static dispenser_t dispenser = {
     .calibrated = false,
@@ -19,6 +20,7 @@ static int slices = 8;
 
 void init_dispenser() {
     setup_dispenser(&dispenser);
+    init_storage();
     align_dispenser(1);
 }
 
@@ -28,6 +30,7 @@ void align_dispenser(int rev) {
     int previous_read = gpio_get(dispenser.opto_fork);
     int current_read;
     bool aligned = false;
+    save_dispenser_state(DISPENSER_TURNING);
     while (!aligned) {
         current_read = gpio_get(dispenser.opto_fork);
         if (previous_read == 1 && current_read == 0) aligned = true;
@@ -40,11 +43,12 @@ void align_dispenser(int rev) {
         run_dispenser(&dispenser);
         previous_read = current_read;
         current_read = gpio_get(dispenser.opto_fork);
-        steps_count ++;
-        if (previous_read==1&&current_read==0) count++;
+        steps_count++;
+        if (previous_read == 1 && current_read == 0) count++;
     }
-    if (rev>0) dispenser.step_per_rev = steps_count/rev;
+    if (rev > 0) dispenser.step_per_rev = steps_count / rev;
     dispenser.calibrated = true;
+    save_dispenser_state(DISPENSER_IDLE);
 }
 
 void error_calibration(int n) {
@@ -56,15 +60,18 @@ void error_calibration(int n) {
 
 void run_n_slice(int n) {
     int steps_to_run = (dispenser.step_per_rev / slices) * n;
+    save_dispenser_state(DISPENSER_TURNING);
     for (int i = 0; i < steps_to_run; i++) {
         run_dispenser(&dispenser);
     }
+    save_dispenser_state(DISPENSER_IDLE);
 }
 
 bool dispense_pill() {
     bool pill = false;
     int steps_to_run = dispenser.step_per_rev / slices;
     uint start_time = to_ms_since_boot(get_absolute_time());
+    save_dispenser_state(DISPENSER_TURNING);
     for (int i = 0; i < steps_to_run; i++) {
         run_dispenser(&dispenser);
         if (!gpio_get(dispenser.piezo)) {
@@ -75,6 +82,8 @@ bool dispense_pill() {
             }
         }
     }
+    save_dispenser_state(DISPENSER_IDLE);
     (dispenser.slices_runned)++;
+    save_dispenser_slice_ran(dispenser.slices_runned);
     return pill;
 }

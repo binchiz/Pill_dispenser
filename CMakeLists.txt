@@ -31,24 +31,20 @@ include_directories(${PROJECT_SOURCE_DIR}/src)
 # Create a library from your source files (excluding main.c)
 add_library(${PROJECT_NAME}_lib STATIC
         # drivers
-        src/drivers/button.c
         src/drivers/eeprom.c
         src/drivers/led.c
         src/drivers/uart_irq/uart.c
         src/drivers/uart_irq/ring_buffer.c
-        #src/drivers/piezo_sensor.c
-        #src/drivers/stepper_motor.c
-        src/drivers/isr.c
         src/drivers/dispenser.c
 
         # utils
         src/utils/debug.c
 
         # main logic
-        #src/motor_control.c
         src/lora.c
         src/storage.c
         src/dispenser_control.c
+        src/buttons.c
 )
 
 

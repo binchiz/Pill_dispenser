@@ -9,7 +9,8 @@ typedef struct {
     bool state;
 } led_t;
 
-void led_init(led_t *led);
+void init_led(led_t *led);
 void set_led(led_t *led, bool state);
+void toggle_led(led_t *led);
 
 #endif // LED_H
