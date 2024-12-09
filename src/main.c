@@ -10,13 +10,13 @@
 
 
 int main(void) {
+    timer_hw->dbgpause = 0;
     stdio_init_all();
     set_debug_level(DEBUG_LEVEL_DEBUG);
     init_led();
     init_storage();
     init_dispenser();
     init_buttons();
-    enable_buttons();
     lora_init_and_connect();
 
     dispenser_sm dsm = {stStart};
