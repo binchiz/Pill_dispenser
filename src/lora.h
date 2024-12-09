@@ -1,3 +1,5 @@
+#ifndef LORA_H
+#define LORA_H
 #include "hardware/uart.h"
 
 enum event_codes {
@@ -22,4 +24,6 @@ typedef struct {
 } lora_t;
 
 void lora_init_and_connect();
+
 int send_message(int event_code, char *message);
+#endif
