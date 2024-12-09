@@ -3,7 +3,7 @@
 
 
 void setup_dispenser(const dispenser_t *dispenser) {
-    for (int i = 0; i < sizeof(dispenser->pins); i++) {
+    for (int i = 0; i < sizeof(dispenser->pins)/sizeof(dispenser->pins[0]); i++) {
         gpio_init(dispenser->pins[i]);
         gpio_set_dir(dispenser->pins[i], GPIO_OUT);
     }
@@ -13,7 +13,6 @@ void setup_dispenser(const dispenser_t *dispenser) {
     gpio_init(dispenser->piezo);
     gpio_set_dir(dispenser->piezo, GPIO_IN);
     gpio_pull_up(dispenser->piezo);
-
 }
 
 void run_dispenser(dispenser_t *dispenser) {
