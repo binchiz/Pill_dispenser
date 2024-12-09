@@ -35,7 +35,6 @@ add_library(${PROJECT_NAME}_lib STATIC
         src/drivers/led.c
         src/drivers/uart_irq/uart.c
         src/drivers/uart_irq/ring_buffer.c
-        src/drivers/isr.c
         src/drivers/dispenser.c
 
         # utils
