@@ -3,7 +3,7 @@
 
 #include <stdbool.h>
 
-typedef enum { DISPENSER_TURNING, DISPENSER_IDLE } dispenser_state_t;
+typedef enum { DISPENSER_IDLE, DISPENSER_TURNING } dispenser_state_t;
 
 void init_storage();
 bool save_dispenser_state(dispenser_state_t state);
