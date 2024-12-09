@@ -10,7 +10,7 @@ typedef enum {
     stDispense
 } dispenser_st;
 
-typedef struct traffic_sm {
+typedef struct dispenser_sm {
     dispenser_st state;
 } dispenser_sm;
 
