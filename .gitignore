@@ -1,9 +1,3 @@
 .idea
 cmake-build-debug
 .DS_Store
-
-# Ignore everything in the test directory
-test/*
-# But do not ignore these two files
-!test/CMakeLists.txt
-!test/test_example.c
