@@ -1,9 +1,9 @@
 #include "dispenser_control.h"
 #include "drivers/dispenser.h"
-#include "pico/stdlib.h"
 #include "drivers/led.h"
-#include "storage.h"
 #include "lora.h"
+#include "pico/stdlib.h"
+#include "storage.h"
 #include <stdio.h>
 
 static dispenser_t dispenser = {
@@ -99,14 +99,16 @@ void dispense_all_pills() {
     int pills_left = total_pills - dispenser.slices_ran;
     for (int i = 0; i < pills_left; i++) {
         bool pill_dispensed = dispense_pill();
-        if (pill_dispensed) printf("dispensed!");//send_message(PILL_DISPENSED, "Pill Dispensed");
-        else {
+        if (pill_dispensed) {
+            printf("dispensed!");
+            send_message(PILL_DISPENSED, "Pill Dispensed");
+        } else {
             toggle_led_n_times(5);
-            //send_message(CNOT_DISPENSED, "Pill Not Dispensed");
+            send_message(CNOT_DISPENSED, "Pill Not Dispensed");
         }
         sleep_ms(3000);
     }
     dispenser.slices_ran = 0;
     save_dispenser_slice_ran(0);
-    //send_message(DISPENSER_EMPTY, "Dispenser Empty");
+    send_message(DISPENSER_EMPTY, "Dispenser Empty");
 }

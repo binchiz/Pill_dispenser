@@ -1,13 +1,9 @@
 #include "lora.h"
-#include "hardware/gpio.h"
-#include "hardware/uart.h"
 #include "drivers/uart_irq/uart.h"
-
-#include <hardware/timer.h>
-#include <stdio.h>
-#include <string.h>
 #include <pico/stdio.h>
 #include <pico/time.h>
+#include <stdio.h>
+#include <string.h>
 
 #define SIZE 256
 #define send_time_limit 50000
@@ -28,6 +24,7 @@ lora_t lora_basic_configuration() {
 }
 
 void connect_lora(const lora_t *lora) {
+#if ENABLE_LORA
     char message[5][SIZE] = {0};
     char str[5][SIZE] = {0};
     snprintf(message[0], SIZE, "AT+MODE=LWOTAA\r\n");
@@ -42,8 +39,8 @@ void connect_lora(const lora_t *lora) {
         sleep_ms(200);
         uart_read(lora->uart_nr, str[i], sizeof(str));
         const uint first_time = to_ms_since_boot(get_absolute_time());
-        while (i == 4 && strstr(str[i], "+JOIN: Network joined") == NULL && to_ms_since_boot(get_absolute_time()) -
-               first_time < connect_time_limit) {
+        while (i == 4 && strstr(str[i], "+JOIN: Network joined") == NULL &&
+               to_ms_since_boot(get_absolute_time()) - first_time < connect_time_limit) {
             uart_read(lora->uart_nr, str[i], sizeof(str));
             sleep_ms(1000);
             printf("linking ...\n");
@@ -54,9 +51,13 @@ void connect_lora(const lora_t *lora) {
         }
     }
     printf("network connect successfully\n");
+#else
+    printf("connect_lora (lora is disabled)\n");
+#endif
 }
 
 int send_message(const int event_code, char *message) {
+#if ENABLE_LORA
     char message_buf[SIZE];
     snprintf(message_buf, SIZE, "AT+MSG=\"[%d]%s\"\r\n", event_code, message);
     uart_send(1, message_buf);
@@ -74,18 +75,18 @@ int send_message(const int event_code, char *message) {
     }
     printf("%s send successfully\n", message);
     return 1;
+#else
+    printf("send_message (lora is disabled)\n");
+    return 0;
+#endif
 }
 
-
 void lora_init_and_connect() {
+#if ENABLE_LORA
     const lora_t lora = lora_basic_configuration();
     uart_setup(lora.uart_nr, lora.tx_pin, lora.rx_pin, lora.baud_rate);
     connect_lora(&lora);
+#else
+    printf("lora_init_and_connect (lora is disabled)\n");
+#endif
 }
-
-// int main(void) {
-//     stdio_init_all();
-//     lora_init_and_connect();
-//     send_message(BOOT, "sheng,bc,zzy!");
-//     return 0;
-// }

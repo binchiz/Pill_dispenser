@@ -1,5 +1,7 @@
 #include "hardware/uart.h"
 
+#define ENABLE_LORA 1
+
 enum event_codes {
     BOOT = 100,
     PILL_DISPENSED = 200,

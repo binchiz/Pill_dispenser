@@ -20,8 +20,8 @@ int main(void) {
     lora_init_and_connect();
 
     dispenser_sm dsm = {stStart};
-    //send_message(BOOT, "Dispenser Boot");
-
+    send_message(BOOT, "Dispenser Boot");
+    dprintf(DEBUG_LEVEL_DEBUG, "Enter state machine\n");
     while (true) {
         run_dispenser_sm(&dsm);
         sleep_ms(500);
