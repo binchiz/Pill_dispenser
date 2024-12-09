@@ -16,7 +16,7 @@ typedef struct {
   direction_t direction;
   int step;
   int step_per_rev;
-  int slices_runned;
+  int slices_ran;
 } dispenser_t;
 
 void setup_dispenser(const dispenser_t *dispenser);

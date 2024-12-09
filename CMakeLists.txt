@@ -45,6 +45,7 @@ add_library(${PROJECT_NAME}_lib STATIC
         src/storage.c
         src/dispenser_control.c
         src/buttons.c
+        src/pill_dispenser_sm.c
 )
 
 

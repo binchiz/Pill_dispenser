@@ -1,7 +1,9 @@
 #include "dispenser_control.h"
 #include "drivers/dispenser.h"
 #include "pico/stdlib.h"
+#include "drivers/led.h"
 #include "storage.h"
+#include "lora.h"
 #include <stdio.h>
 
 static dispenser_t dispenser = {
@@ -13,15 +15,20 @@ static dispenser_t dispenser = {
     .direction = COUNTER_CLOCKWISE,
     .step = 0,
     .step_per_rev = 4096,
-    .slices_runned = 0
+    .slices_ran = 0
 };
 
 static int slices = 8;
+static int total_pills = 7;
+static int falling_time = 85;
 
 void init_dispenser() {
     setup_dispenser(&dispenser);
     init_storage();
-    align_dispenser(1);
+}
+
+void restore_dispenser() {
+    load_dispenser_slice_ran(&dispenser.slices_ran);
 }
 
 void align_dispenser(int rev) {
@@ -51,11 +58,11 @@ void align_dispenser(int rev) {
     save_dispenser_state(DISPENSER_IDLE);
 }
 
-void error_calibration(int n) {
+void error_calibration() {
     dispenser.direction = !(dispenser.direction);
     align_dispenser(0);
     dispenser.direction = !(dispenser.direction);
-    run_n_slice(n);
+    run_n_slice(dispenser.slices_ran);
 }
 
 void run_n_slice(int n) {
@@ -76,14 +83,30 @@ bool dispense_pill() {
         run_dispenser(&dispenser);
         if (!gpio_get(dispenser.piezo)) {
             uint current_time = to_ms_since_boot(get_absolute_time());
-            if (current_time - start_time > 85) {
+            if (current_time - start_time > falling_time) {
                 pill = true;
                 start_time = current_time;
             }
         }
     }
     save_dispenser_state(DISPENSER_IDLE);
-    (dispenser.slices_runned)++;
-    save_dispenser_slice_ran(dispenser.slices_runned);
+    (dispenser.slices_ran)++;
+    save_dispenser_slice_ran(dispenser.slices_ran);
     return pill;
+}
+
+void dispense_all_pills() {
+    int pills_left = total_pills - dispenser.slices_ran;
+    for (int i = 0; i < pills_left; i++) {
+        bool pill_dispensed = dispense_pill();
+        if (pill_dispensed) printf("dispensed!");//send_message(PILL_DISPENSED, "Pill Dispensed");
+        else {
+            toggle_led_n_times(5);
+            //send_message(CNOT_DISPENSED, "Pill Not Dispensed");
+        }
+        sleep_ms(3000);
+    }
+    dispenser.slices_ran = 0;
+    save_dispenser_slice_ran(0);
+    //send_message(DISPENSER_EMPTY, "Dispenser Empty");
 }
