@@ -19,40 +19,49 @@ void run_dispenser_sm (dispenser_sm *dispenser_sm_ptr) {
             if (data == DISPENSER_TURNING) {
                 send_message(POWER_OFF_DURING_TURNING, "Powered Off During Turn");
                 dispenser_sm_ptr->state = stError;
+                dprintf(DEBUG_LEVEL_INFO, "Re-calib from err\n");
             }
             else if (slices_ran == 0) {
                 dispenser_sm_ptr -> state = stCalibWait;
                 enable_buttons();
+                dprintf(DEBUG_LEVEL_INFO, "Wait calib\n");
             }
-            else dispenser_sm_ptr->state = stDispense;
+            else {
+                dispenser_sm_ptr->state = stDispense;
+                dprintf(DEBUG_LEVEL_INFO, "Ready\n");
+            }
             break;
         case stError:
             error_calibration();
             dispenser_sm_ptr->state = stDispense;
+            dprintf(DEBUG_LEVEL_INFO, "Error resolved, ready\n");
             break;
         case stCalibWait:
             toggle_led();
-            dprintf(DEBUG_LEVEL_DEBUG, "Press any button to calibrate\n");
             if (get_button_event() != EVENT_NONE) {
                 dispenser_sm_ptr->state = stCalib;
+                dprintf(DEBUG_LEVEL_INFO, "Calib start\n");
                 disable_buttons();
             }
             break;
         case stCalib:
             align_dispenser(1);
             dispenser_sm_ptr->state = stDispenseWait;
+            dprintf(DEBUG_LEVEL_INFO, "Calib done, ready\n");
             enable_buttons();
             break;
         case stDispenseWait:
             set_led(true);
             if (get_button_event() != EVENT_NONE) {
                 dispenser_sm_ptr->state = stDispense;
+                dprintf(DEBUG_LEVEL_INFO, "Dispense start\n");
                 disable_buttons();
             }
             break;
         case stDispense:
             dispense_all_pills();
             dispenser_sm_ptr->state = stStart;
+            dprintf(DEBUG_LEVEL_INFO, "Dispense done\n");
             break;
     }
 }
