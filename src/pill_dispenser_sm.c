@@ -30,20 +30,6 @@ void run_dispenser_sm (dispenser_sm *dispenser_sm_ptr) {
                 dispenser_sm_ptr->state = stDispense;
                 dprintf(DEBUG_LEVEL_INFO, "Ready\n");
             }
-            // if (data == DISPENSER_TURNING) {
-            //     send_message(POWER_OFF_DURING_TURNING, "Powered Off During Turn");
-            //     dispenser_sm_ptr->state = stError;
-            //     dprintf(DEBUG_LEVEL_INFO, "Re-calib from err\n");
-            // }
-            // else if (slices_ran == 0) {
-            //     dispenser_sm_ptr -> state = stCalibWait;
-            //     enable_buttons();
-            //     dprintf(DEBUG_LEVEL_INFO, "Wait calib\n");
-            // }
-            // else {
-            //     dispenser_sm_ptr->state = stDispense;
-            //     dprintf(DEBUG_LEVEL_INFO, "Ready\n");
-            // }
             break;
         case stError:
             error_calibration();
