@@ -18,7 +18,7 @@ lora_t lora_basic_configuration() {
     lora.uart_nr = 1;
     lora.event_code = 0;
     lora.message = "";
-    lora.app_key = "1e89ed8348de1b42ce000d49f4d8c893";
+    lora.app_key = "bb1afcb9f4525f435c00d82a03f5f483";
     lora.times_limit = 5;
     lora.timeout_us = 500000;
     return lora;
@@ -46,7 +46,7 @@ void connect_lora(const lora_t *lora) {
             sleep_ms(1000);
             printf("linking ...\n");
         }
-        if (strstr(str[i], "+JOIN: Network joined") == NULL) {
+        if (i == 4 && strstr(str[i], "+JOIN: Network joined") == NULL) {
             printf("connect failed\n");
             return;
         }
