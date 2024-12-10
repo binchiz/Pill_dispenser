@@ -21,6 +21,7 @@ static dispenser_t dispenser = {
 static int slices = 8;
 static int total_pills = 7;
 static int falling_time = 85;
+static int error_compensation = 110;
 
 void init_dispenser() {
     setup_dispenser(&dispenser);
@@ -52,6 +53,10 @@ void align_dispenser(int rev) {
         current_read = gpio_get(dispenser.opto_fork);
         steps_count++;
         if (previous_read == 1 && current_read == 0) count++;
+    }
+    // modify error compensation
+    for(int i = 0; i < error_compensation; i++) {
+        run_dispenser(&dispenser);
     }
     if (rev > 0) dispenser.step_per_rev = steps_count / rev;
     dispenser.calibrated = true;
