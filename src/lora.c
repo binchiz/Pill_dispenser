@@ -42,6 +42,9 @@ void connect_lora(const lora_t *lora) {
         const uint first_time = to_ms_since_boot(get_absolute_time());
         while (i == 4 && strstr(str[i], "+JOIN: Network joined") == NULL &&
                to_ms_since_boot(get_absolute_time()) - first_time < connect_time_limit) {
+            if (strstr(str[i], "+JOIN: Join failed") != NULL) {
+                uart_send(lora->uart_nr, message[i]);
+            }
             uart_read(lora->uart_nr, str[i], sizeof(str));
             sleep_ms(1000);
             printf("linking ...\n");

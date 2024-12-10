@@ -67,7 +67,8 @@ void error_calibration() {
     dispenser.direction = !(dispenser.direction);
     align_dispenser(0);
     dispenser.direction = !(dispenser.direction);
-    run_n_slice(dispenser.slices_ran);
+    run_n_slice(--dispenser.slices_ran);
+    sleep_ms(1000);
 }
 
 void run_n_slice(int n) {
@@ -84,6 +85,8 @@ bool dispense_pill() {
     int steps_to_run = dispenser.step_per_rev / slices;
     uint start_time = to_ms_since_boot(get_absolute_time());
     save_dispenser_state(DISPENSER_TURNING);
+    (dispenser.slices_ran)++;
+    save_dispenser_slice_ran(dispenser.slices_ran);
     for (int i = 0; i < steps_to_run; i++) {
         run_dispenser(&dispenser);
         if (!gpio_get(dispenser.piezo)) {
@@ -95,8 +98,7 @@ bool dispense_pill() {
         }
     }
     save_dispenser_state(DISPENSER_IDLE);
-    (dispenser.slices_ran)++;
-    save_dispenser_slice_ran(dispenser.slices_ran);
+
     return pill;
 }
 
