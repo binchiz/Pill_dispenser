@@ -1,3 +1,5 @@
+#ifndef lora_H
+#define lora_H
 #include "hardware/uart.h"
 
 #define ENABLE_LORA 1
@@ -24,4 +26,6 @@ typedef struct {
 } lora_t;
 
 void lora_init_and_connect();
+
 int send_message(int event_code, char *message);
+#endif //lora_H
