@@ -2,7 +2,7 @@
 #define lora_H
 #include "hardware/uart.h"
 
-#define ENABLE_LORA 1
+#define ENABLE_LORA 0
 
 enum event_codes {
     BOOT = 100,
@@ -13,17 +13,7 @@ enum event_codes {
     HEARTBEAT = 999
 };
 
-typedef struct {
-    int baud_rate;
-    int tx_pin;
-    int rx_pin;
-    int uart_nr;
-    int event_code;
-    char *message;
-    char *app_key;
-    uint times_limit;
-    uint timeout_us;
-} lora_t;
+
 
 void lora_init_and_connect();
 

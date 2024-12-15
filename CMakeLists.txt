@@ -25,25 +25,20 @@ add_compile_options(-Wall
 # Add the src and test directory
 add_subdirectory(test)
 
-# Include directories
-include_directories(${PROJECT_SOURCE_DIR}/src)
 
 # Create a library from your source files (excluding main.c)
 add_library(${PROJECT_NAME}_lib STATIC
-        # drivers
-        src/drivers/eeprom.c
-        src/drivers/led.c
-        src/drivers/uart_irq/uart.c
-        src/drivers/uart_irq/ring_buffer.c
-        src/drivers/dispenser.c
-
-        # utils
-        src/utils/debug.c
+        # lib
+        src/lib/eeprom.c
+        src/lib/uart_irq/uart.c
+        src/lib/uart_irq/ring_buffer.c
+        src/lib/debug.c
 
         # main logic
+        src/led.c
         src/lora.c
         src/storage.c
-        src/dispenser_control.c
+        src/dispenser.c
         src/buttons.c
         src/pill_dispenser_sm.c
 )
@@ -51,7 +46,6 @@ add_library(${PROJECT_NAME}_lib STATIC
 
 # Add the main executable
 add_executable(${PROJECT_NAME}
-        # main
         src/main.c
 )
 

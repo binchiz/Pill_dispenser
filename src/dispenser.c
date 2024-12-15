@@ -1,10 +1,25 @@
-#include "dispenser_control.h"
-#include "drivers/dispenser.h"
-#include "drivers/led.h"
+#include "dispenser.h"
+#include "led.h"
 #include "lora.h"
 #include "pico/stdlib.h"
 #include "storage.h"
 #include <stdio.h>
+
+#define dispenser_TOTAL_PINS 4
+#define dispenser_TOTAL_STEPS 8
+typedef enum { CLOCKWISE, COUNTER_CLOCKWISE } direction_t;
+
+typedef struct {
+    bool calibrated;
+    uint opto_fork;
+    uint piezo;
+    uint pins[dispenser_TOTAL_PINS];
+    uint step_bits[dispenser_TOTAL_STEPS];
+    direction_t direction;
+    int step;
+    int step_per_rev;
+    int slices_ran;
+} dispenser_t;
 
 static dispenser_t dispenser = {
     .calibrated = false,
@@ -18,13 +33,16 @@ static dispenser_t dispenser = {
     .slices_ran = 0
 };
 
+static void setup_dispenser();
+static void run_dispenser();
+
 static int slices = 8;
 static int total_pills = 7;
 static int falling_time = 85;
 static int error_compensation = 110;
 
 void init_dispenser() {
-    setup_dispenser(&dispenser);
+    setup_dispenser();
     init_storage();
 }
 
@@ -44,19 +62,19 @@ void align_dispenser(int rev) {
         if (previous_read == 1 && current_read == 0) aligned = true;
         else {
             previous_read = current_read;
-            run_dispenser(&dispenser);
+            run_dispenser();
         }
     }
     while (count < rev) {
-        run_dispenser(&dispenser);
+        run_dispenser();
         previous_read = current_read;
         current_read = gpio_get(dispenser.opto_fork);
         steps_count++;
         if (previous_read == 1 && current_read == 0) count++;
     }
     // modify error compensation
-    for(int i = 0; i < error_compensation; i++) {
-        run_dispenser(&dispenser);
+    for (int i = 0; i < error_compensation; i++) {
+        run_dispenser();
     }
     if (rev > 0) dispenser.step_per_rev = steps_count / rev;
     dispenser.calibrated = true;
@@ -75,7 +93,7 @@ void run_n_slice(int n) {
     int steps_to_run = (dispenser.step_per_rev / slices) * n;
     save_dispenser_state(DISPENSER_TURNING);
     for (int i = 0; i < steps_to_run; i++) {
-        run_dispenser(&dispenser);
+        run_dispenser();
     }
     save_dispenser_state(DISPENSER_IDLE);
 }
@@ -88,7 +106,7 @@ bool dispense_pill() {
     (dispenser.slices_ran)++;
     save_dispenser_slice_ran(dispenser.slices_ran);
     for (int i = 0; i < steps_to_run; i++) {
-        run_dispenser(&dispenser);
+        run_dispenser();
         if (!gpio_get(dispenser.piezo)) {
             uint current_time = to_ms_since_boot(get_absolute_time());
             if (current_time - start_time > falling_time) {
@@ -118,4 +136,33 @@ void dispense_all_pills() {
     dispenser.slices_ran = 0;
     save_dispenser_slice_ran(0);
     send_message(DISPENSER_EMPTY, "Dispenser Empty");
+}
+
+/* -------------------
+ * Private functions
+ */
+static void setup_dispenser() {
+    for (int i = 0; i < sizeof(dispenser.pins) / sizeof(dispenser.pins[0]); i++) {
+        gpio_init(dispenser.pins[i]);
+        gpio_set_dir(dispenser.pins[i], GPIO_OUT);
+    }
+    gpio_init(dispenser.opto_fork);
+    gpio_set_dir(dispenser.opto_fork, GPIO_IN);
+    gpio_pull_up(dispenser.opto_fork);
+    gpio_init(dispenser.piezo);
+    gpio_set_dir(dispenser.piezo, GPIO_IN);
+    gpio_pull_up(dispenser.piezo);
+}
+
+static void run_dispenser() {
+    if (dispenser.direction == COUNTER_CLOCKWISE) {
+        dispenser.step = (dispenser.step + 1) % 8;
+    } else {
+        dispenser.step = (dispenser.step - 1 + 8) % 8;
+    }
+    uint next_step = dispenser.step_bits[dispenser.step];
+    for (int i = 0; i < sizeof(dispenser.pins) / sizeof(uint); i++) {
+        gpio_put(dispenser.pins[i], (next_step >> i) & 1);
+    }
+    sleep_ms(2);
 }

@@ -1,5 +1,5 @@
 #include "pico/stdlib.h"
-#include "utils/debug.h"
+#include "lib/debug.h"
 
 int main(void) {
     stdio_init_all();

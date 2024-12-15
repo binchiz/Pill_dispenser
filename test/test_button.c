@@ -1,6 +1,6 @@
 #include "buttons.h"
 #include "pico/stdlib.h"
-#include "utils/debug.h"
+#include "lib/debug.h"
 #include <stdio.h>
 
 int main(void) {

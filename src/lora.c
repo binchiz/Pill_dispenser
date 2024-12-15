@@ -1,6 +1,6 @@
 #include "lora.h"
-#include "drivers/uart_irq/uart.h"
-#include "utils/debug.h"
+#include "lib/uart_irq/uart.h"
+#include "lib/debug.h"
 #include <pico/stdio.h>
 #include <pico/time.h>
 #include <stdio.h>
@@ -9,6 +9,18 @@
 #define SIZE 256
 #define send_time_limit 50000
 #define connect_time_limit 200000
+
+typedef struct {
+    int baud_rate;
+    int tx_pin;
+    int rx_pin;
+    int uart_nr;
+    int event_code;
+    char *message;
+    char *app_key;
+    uint times_limit;
+    uint timeout_us;
+} lora_t;
 
 lora_t lora_basic_configuration() {
     lora_t lora;

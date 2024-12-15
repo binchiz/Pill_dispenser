@@ -1,10 +1,10 @@
-#include "dispenser_control.h"
+#include "pill_dispenser_sm.h"
+#include "buttons.h"
+#include "dispenser.h"
+#include "led.h"
 #include "lora.h"
 #include "storage.h"
-#include "buttons.h"
-#include "drivers/led.h"
-#include "pill_dispenser_sm.h"
-#include "utils/debug.h"
+#include "lib/debug.h"
 
 static dispenser_state_t data;
 static int slices_ran;
