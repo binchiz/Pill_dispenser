@@ -1,6 +1,6 @@
 #include "eeprom.h"
 #include "pico/stdlib.h"
-#include "utils/debug.h"
+#include "debug.h"
 #include <string.h>
 
 #define EEPROM_WRITE_TIMEOUT 1000 // ms

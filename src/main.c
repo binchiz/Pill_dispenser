@@ -1,13 +1,12 @@
-#include <stdio.h>
-#include "pico/stdlib.h"
-#include "utils/debug.h"
-#include "drivers/led.h"
 #include "buttons.h"
-#include "dispenser_control.h"
+#include "dispenser.h"
+#include "led.h"
 #include "lora.h"
-#include "storage.h"
+#include "pico/stdlib.h"
 #include "pill_dispenser_sm.h"
-
+#include "storage.h"
+#include "lib/debug.h"
+#include <stdio.h>
 
 int main(void) {
     timer_hw->dbgpause = 0;

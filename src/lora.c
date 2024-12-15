@@ -1,6 +1,6 @@
 #include "lora.h"
-#include "drivers/uart_irq/uart.h"
-#include "utils/debug.h"
+#include "lib/uart_irq/uart.h"
+#include "lib/debug.h"
 #include <pico/stdio.h>
 #include <pico/time.h>
 #include <stdio.h>
@@ -9,6 +9,18 @@
 #define SIZE 256
 #define send_time_limit 50000
 #define connect_time_limit 200000
+
+typedef struct {
+    int baud_rate;
+    int tx_pin;
+    int rx_pin;
+    int uart_nr;
+    int event_code;
+    char *message;
+    char *app_key;
+    uint times_limit;
+    uint timeout_us;
+} lora_t;
 
 lora_t lora_basic_configuration() {
     lora_t lora;
@@ -56,7 +68,7 @@ void connect_lora(const lora_t *lora) {
     }
     dprintf(DEBUG_LEVEL_INFO, "network connect successfully\n");
 #else
-    dprintf(DEBUG_LEVEL_DEBUG, "connect_lora (lora is disabled)\n");
+    dprintf(DEBUG_LEVEL_DEBUG, "simulating connect_lora (lora disabled)\n");
 #endif
 }
 
@@ -80,7 +92,7 @@ int send_message(const int event_code, char *message) {
     dprintf(DEBUG_LEVEL_INFO, "%s send successfully\n", message);
     return 1;
 #else
-    dprintf(DEBUG_LEVEL_DEBUG, "send_message (lora is disabled)\n");
+    dprintf(DEBUG_LEVEL_DEBUG, "simulating send: %s (lora disabled)\n", message);
     return 1;
 #endif
 }
@@ -91,6 +103,6 @@ void lora_init_and_connect() {
     uart_setup(lora.uart_nr, lora.tx_pin, lora.rx_pin, lora.baud_rate);
     connect_lora(&lora);
 #else
-    dprintf(DEBUG_LEVEL_DEBUG, "lora_init_and_connect (lora is disabled)\n");
+    dprintf(DEBUG_LEVEL_DEBUG, "simulating lora_init_and_connect (lora disabled)\n");
 #endif
 }

@@ -1,6 +1,6 @@
 #include "storage.h"
-#include "drivers/eeprom.h"
-#include "utils/debug.h"
+#include "lib/eeprom.h"
+#include "lib/debug.h"
 
 // EEPROM memory map
 #define MEM_DISPENSER_STATE 0x7FFF

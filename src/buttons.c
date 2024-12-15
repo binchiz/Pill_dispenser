@@ -1,7 +1,7 @@
 #include "buttons.h"
 #include "pico/stdlib.h"
 #include "pico/util/queue.h"
-#include "utils/debug.h"
+#include "lib/debug.h"
 
 #define BUTTON_EVENT_QUEUE_SIZE 5
 #define SW0_PIN 9
