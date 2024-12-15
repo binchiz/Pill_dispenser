@@ -1,5 +1,6 @@
 #include "dispenser.h"
 #include "led.h"
+#include "lib/debug.h"
 #include "lora.h"
 #include "pico/stdlib.h"
 #include "storage.h"
@@ -33,17 +34,33 @@ static dispenser_t dispenser = {
     .slices_ran = 0
 };
 
-static void setup_dispenser();
 static void run_dispenser();
+static void stop_dispenser();
+static void run_n_slice(int n);
+static void piezo_handler();
+static void enable_piezo();
+static void disable_piezo();
 
 static int slices = 8;
 static int total_pills = 7;
 static int falling_time = 85;
 static int error_compensation = 110;
+static bool piezo_triggered = false;
 
 void init_dispenser() {
-    setup_dispenser();
-    init_storage();
+    for (int i = 0; i < sizeof(dispenser.pins) / sizeof(dispenser.pins[0]); i++) {
+        gpio_init(dispenser.pins[i]);
+        gpio_set_dir(dispenser.pins[i], GPIO_OUT);
+    }
+    gpio_init(dispenser.opto_fork);
+    gpio_set_dir(dispenser.opto_fork, GPIO_IN);
+    gpio_pull_up(dispenser.opto_fork);
+    gpio_init(dispenser.piezo);
+    gpio_set_dir(dispenser.piezo, GPIO_IN);
+    gpio_pull_up(dispenser.piezo);
+    // setup piezo interrupt handler
+    gpio_add_raw_irq_handler(dispenser.piezo, piezo_handler);
+    irq_set_enabled(IO_IRQ_BANK0, true);
 }
 
 void restore_dispenser_slices_ran(int slices_ran) {
@@ -79,6 +96,7 @@ void align_dispenser(int rev) {
     if (rev > 0) dispenser.step_per_rev = steps_count / rev;
     dispenser.calibrated = true;
     save_dispenser_state(DISPENSER_IDLE);
+    stop_dispenser(); // set all pins to 0 to avoid overheating
 }
 
 void error_calibration() {
@@ -89,34 +107,29 @@ void error_calibration() {
     sleep_ms(1000);
 }
 
-void run_n_slice(int n) {
-    int steps_to_run = (dispenser.step_per_rev / slices) * n;
-    save_dispenser_state(DISPENSER_TURNING);
-    for (int i = 0; i < steps_to_run; i++) {
-        run_dispenser();
-    }
-    save_dispenser_state(DISPENSER_IDLE);
-}
-
 bool dispense_pill() {
     bool pill = false;
-    int steps_to_run = dispenser.step_per_rev / slices;
-    uint start_time = to_ms_since_boot(get_absolute_time());
     save_dispenser_state(DISPENSER_TURNING);
-    (dispenser.slices_ran)++;
-    save_dispenser_slice_ran(dispenser.slices_ran);
-    for (int i = 0; i < steps_to_run; i++) {
-        run_dispenser();
-        if (!gpio_get(dispenser.piezo)) {
-            uint current_time = to_ms_since_boot(get_absolute_time());
-            if (current_time - start_time > falling_time) {
-                pill = true;
-                start_time = current_time;
+    save_dispenser_slice_ran(++(dispenser.slices_ran));
+    enable_piezo();
+    run_n_slice(1);
+    save_dispenser_state(DISPENSER_IDLE);
+    stop_dispenser(); // set all pins to 0 to avoid overheating
+    // check if piezo has triggered
+    if ((pill = piezo_triggered) == true) {
+        dprintf(DEBUG_LEVEL_DEBUG, "Piezo detected during motor run\n");
+    } else {
+        // if no pill during turning, wait a little more time within the falling time
+        dprintf(DEBUG_LEVEL_DEBUG, "Waiting for a little extra time\n");
+        uint32_t start_time = to_ms_since_boot(get_absolute_time());
+        while (!pill && to_ms_since_boot(get_absolute_time()) - start_time < falling_time) {
+            if ((pill = piezo_triggered) == true) {
+                dprintf(DEBUG_LEVEL_DEBUG, "Piezo detected after motor run: +%d ms\n",
+                        to_ms_since_boot(get_absolute_time()) - start_time);
             }
         }
     }
-    save_dispenser_state(DISPENSER_IDLE);
-
+    disable_piezo();
     return pill;
 }
 
@@ -125,7 +138,6 @@ void dispense_all_pills() {
     for (int i = 0; i < pills_left; i++) {
         bool pill_dispensed = dispense_pill();
         if (pill_dispensed) {
-            printf("dispensed!");
             send_message(PILL_DISPENSED, "Pill Dispensed");
         } else {
             toggle_led_n_times(5);
@@ -140,19 +152,7 @@ void dispense_all_pills() {
 
 /* -------------------
  * Private functions
- */
-static void setup_dispenser() {
-    for (int i = 0; i < sizeof(dispenser.pins) / sizeof(dispenser.pins[0]); i++) {
-        gpio_init(dispenser.pins[i]);
-        gpio_set_dir(dispenser.pins[i], GPIO_OUT);
-    }
-    gpio_init(dispenser.opto_fork);
-    gpio_set_dir(dispenser.opto_fork, GPIO_IN);
-    gpio_pull_up(dispenser.opto_fork);
-    gpio_init(dispenser.piezo);
-    gpio_set_dir(dispenser.piezo, GPIO_IN);
-    gpio_pull_up(dispenser.piezo);
-}
+ * ------------------- */
 
 static void run_dispenser() {
     if (dispenser.direction == COUNTER_CLOCKWISE) {
@@ -165,4 +165,38 @@ static void run_dispenser() {
         gpio_put(dispenser.pins[i], (next_step >> i) & 1);
     }
     sleep_ms(2);
+}
+
+static void stop_dispenser() {
+    for (int i = 0; i < sizeof(dispenser.pins) / sizeof(uint); i++) {
+        gpio_put(dispenser.pins[i], 0);
+    }
+}
+
+static void run_n_slice(int n) {
+    int steps_to_run = (dispenser.step_per_rev / slices) * n;
+    save_dispenser_state(DISPENSER_TURNING);
+    for (int i = 0; i < steps_to_run; i++) {
+        run_dispenser();
+    }
+    save_dispenser_state(DISPENSER_IDLE);
+    stop_dispenser(); // set all pins to 0 to avoid overheating
+}
+
+static void piezo_handler() {
+    if (gpio_get_irq_event_mask(dispenser.piezo) & GPIO_IRQ_EDGE_FALL) {
+        gpio_acknowledge_irq(dispenser.piezo, GPIO_IRQ_EDGE_FALL);
+        piezo_triggered = true;
+    }
+}
+
+static void enable_piezo() {
+    dprintf(DEBUG_LEVEL_DEBUG, "Piezo enabled\n");
+    gpio_set_irq_enabled(dispenser.piezo, GPIO_IRQ_EDGE_FALL, true);
+}
+
+static void disable_piezo() {
+    dprintf(DEBUG_LEVEL_DEBUG, "Piezo disabled\n");
+    gpio_set_irq_enabled(dispenser.piezo, GPIO_IRQ_EDGE_FALL, false);
+    piezo_triggered = false;
 }

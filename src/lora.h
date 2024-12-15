@@ -2,7 +2,7 @@
 #define lora_H
 #include "hardware/uart.h"
 
-#define ENABLE_LORA 0
+#define ENABLE_LORA 1
 
 enum event_codes {
     BOOT = 100,
