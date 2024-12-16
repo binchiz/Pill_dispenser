@@ -59,7 +59,7 @@ void connect_lora(const lora_t *lora) {
             }
             uart_read(lora->uart_nr, str[i], sizeof(str));
             sleep_ms(1000);
-            printf("linking ...\n");
+            printf("connecting lora...\n");
         }
         if (i == 4 && strstr(str[i], "+JOIN: Network joined") == NULL) {
             printf("connect failed\n");
