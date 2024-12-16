@@ -7,6 +7,8 @@
 #define MEM_DISPENSER_STATE_CHECKSUM 0x7FFE
 #define MEM_DISPENSED_SLICES 0x7FFD
 #define MEM_DISPENSED_SLICES_CHECKSUM 0x7FFC
+#define MEM_DISPENSER_CALIBRATED 0x7FFB
+#define MEM_DISPENSER_CALIBRATED_CHECKSUM 0x7FFA
 
 #define EEPROM_WRITE_TIMEOUT 1000 // ms
 
@@ -53,6 +55,24 @@ bool load_dispenser_slice_ran(int *slices_ran) {
         return true;
     } else {
         dprintf(DEBUG_LEVEL_WARN, "Loading dispensed slices failed\n");
+        return false;
+    }
+}
+
+bool save_dispenser_calibrated(bool calibrated) {
+    dprintf(DEBUG_LEVEL_DEBUG, "Saving dispenser calibration: %d\n", calibrated);
+    return write_byte_with_checksum(&eeprom, MEM_DISPENSER_CALIBRATED, MEM_DISPENSER_CALIBRATED_CHECKSUM, (uint8_t)calibrated);
+}
+
+bool load_dispenser_calibrated(bool *calibrated) {
+    uint8_t data;
+    dprintf(DEBUG_LEVEL_DEBUG, "Loading dispenser calibration\n");
+    if (read_byte_with_checksum(&eeprom, MEM_DISPENSER_CALIBRATED, MEM_DISPENSER_CALIBRATED_CHECKSUM, &data)) {
+        *calibrated = (bool)data;
+        dprintf(DEBUG_LEVEL_DEBUG, "Loading dispenser calibration success: %d\n", *calibrated);
+        return true;
+    } else {
+        dprintf(DEBUG_LEVEL_WARN, "Loading dispenser calibration failed\n");
         return false;
     }
 }
