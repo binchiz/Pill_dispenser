@@ -136,7 +136,6 @@ bool dispense_pill() {
 void dispense_all_pills() {
     int pills_left = total_pills - dispenser.slices_ran;
     dprintf(DEBUG_LEVEL_DEBUG, "%d pills left\n", pills_left);
-    sleep_ms(3000);
     for (int i = 0; i < pills_left; i++) {
         bool pill_dispensed = dispense_pill();
         if (pill_dispensed) {
@@ -145,6 +144,7 @@ void dispense_all_pills() {
             toggle_led_n_times(5);
             send_message(CNOT_DISPENSED, "Pill Not Dispensed");
         }
+        sleep_ms(3000);
     }
     dispenser.slices_ran = 0;
     save_dispenser_slice_ran(0);
