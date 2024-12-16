@@ -74,6 +74,17 @@ void align_dispenser(int rev) {
     int current_read;
     bool aligned = false;
     save_dispenser_state(DISPENSER_TURNING);
+
+    // when opto fork is already open, move the dispenser a bit away preventing rotating a whole revolution.
+    if (gpio_get(dispenser.opto_fork) == 0) {
+        dprintf(DEBUG_LEVEL_DEBUG, "Opto fork is already open, moving away a bit\n");
+        dispenser.direction = !(dispenser.direction);
+        while (gpio_get(dispenser.opto_fork) == 0) {
+            run_dispenser();
+        }
+        dispenser.direction = !(dispenser.direction);
+    }
+
     while (!aligned) {
         current_read = gpio_get(dispenser.opto_fork);
         if (previous_read == 1 && current_read == 0) aligned = true;
