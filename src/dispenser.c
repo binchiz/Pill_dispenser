@@ -103,16 +103,18 @@ void error_calibration() {
     dispenser.direction = !(dispenser.direction);
     align_dispenser(0);
     dispenser.direction = !(dispenser.direction);
-    run_n_slice(--dispenser.slices_ran);
+    dprintf(DEBUG_LEVEL_DEBUG, "re-calib and going to slice %d\n", dispenser.slices_ran);
+    run_n_slice(dispenser.slices_ran);
     sleep_ms(1000);
 }
 
 bool dispense_pill() {
     bool pill = false;
-    save_dispenser_slice_ran(++(dispenser.slices_ran));
+    dprintf(DEBUG_LEVEL_DEBUG, "Saved slices ran: %d\n", dispenser.slices_ran);
     enable_piezo();
     run_n_slice(1);
     stop_dispenser(); // set all pins to 0 to avoid overheating
+    save_dispenser_slice_ran(++(dispenser.slices_ran));
     // check if piezo has triggered
     if ((pill = piezo_triggered) == true) {
         dprintf(DEBUG_LEVEL_DEBUG, "Piezo detected during motor run\n");
@@ -133,6 +135,7 @@ bool dispense_pill() {
 
 void dispense_all_pills() {
     int pills_left = total_pills - dispenser.slices_ran;
+    dprintf(DEBUG_LEVEL_DEBUG, "%d pills left\n", pills_left);
     for (int i = 0; i < pills_left; i++) {
         bool pill_dispensed = dispense_pill();
         if (pill_dispensed) {
@@ -146,6 +149,7 @@ void dispense_all_pills() {
     dispenser.slices_ran = 0;
     save_dispenser_slice_ran(0);
     send_message(DISPENSER_EMPTY, "Dispenser Empty");
+    dispenser.calibrated = false;
 }
 
 /* -------------------
