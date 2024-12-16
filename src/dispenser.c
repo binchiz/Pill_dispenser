@@ -109,11 +109,9 @@ void error_calibration() {
 
 bool dispense_pill() {
     bool pill = false;
-    save_dispenser_state(DISPENSER_TURNING);
     save_dispenser_slice_ran(++(dispenser.slices_ran));
     enable_piezo();
     run_n_slice(1);
-    save_dispenser_state(DISPENSER_IDLE);
     stop_dispenser(); // set all pins to 0 to avoid overheating
     // check if piezo has triggered
     if ((pill = piezo_triggered) == true) {
