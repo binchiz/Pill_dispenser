@@ -103,14 +103,13 @@ void error_calibration() {
     dispenser.direction = !(dispenser.direction);
     align_dispenser(0);
     dispenser.direction = !(dispenser.direction);
-    run_n_slice(dispenser.slices_ran);
+    run_n_slice(--dispenser.slices_ran);
     sleep_ms(1000);
 }
 
 bool dispense_pill() {
     bool pill = false;
-    save_dispenser_slice_ran(dispenser.slices_ran);
-    dispenser.slices_ran++;
+    save_dispenser_slice_ran(++(dispenser.slices_ran));
     enable_piezo();
     run_n_slice(1);
     stop_dispenser(); // set all pins to 0 to avoid overheating
