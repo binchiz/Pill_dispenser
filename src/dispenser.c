@@ -11,7 +11,6 @@
 typedef enum { CLOCKWISE, COUNTER_CLOCKWISE } direction_t;
 
 typedef struct {
-    bool calibrated;
     uint opto_fork;
     uint piezo;
     uint pins[dispenser_TOTAL_PINS];
@@ -23,7 +22,6 @@ typedef struct {
 } dispenser_t;
 
 static dispenser_t dispenser = {
-    .calibrated = false,
     .opto_fork = 28,
     .piezo = 27,
     .pins = {2, 3, 6, 13},
@@ -105,7 +103,6 @@ void align_dispenser(int rev) {
         run_dispenser();
     }
     if (rev > 0) dispenser.step_per_rev = steps_count / rev;
-    dispenser.calibrated = true;
     save_dispenser_state(DISPENSER_IDLE);
     stop_dispenser(); // set all pins to 0 to avoid overheating
 }
@@ -160,7 +157,6 @@ void dispense_all_pills() {
     dispenser.slices_ran = 0;
     save_dispenser_slice_ran(0);
     send_message(DISPENSER_EMPTY, "Dispenser Empty");
-    dispenser.calibrated = false;
 }
 
 /* -------------------
